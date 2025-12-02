@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BG Kitchen Recipe Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Architects Daughter', cursive;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --neon: #4dc4c4;
+        }
+
+        #component-selectors-container {
+            margin: 0 0 8px 0;
+            padding: 4px;
+            border: none;
+            text-align: center;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        #component-selectors-container h3 {
+            margin: 0;
+            padding: 0;
+            font-size: 0.9em;
+            color: var(--neon);
+        }
+
+        .component-btn {
+            background-color: #333;
+            color: #fff;
+            border: 1px solid var(--neon);
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Architects Daughter', cursive;
+        }
+
+        .component-btn:hover, .component-btn.active {
+            background-color: var(--neon);
+            color: #000;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(77, 196, 196, 0.5);
+        }
+
+        .active-player-wrapper {
+            width: 80vw;
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 12px;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2#component-name-display {
+            text-align: center;
+            color: var(--neon);
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px dotted var(--neon);
+            padding-bottom: 10px;
+        }
+
+        .main-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .main-row {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+        }
+
+        .left-col, .center-col, .right-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step-header {
+            margin-bottom: 10px;
+        }
+
+        .step-indicator {
+            color: var(--neon);
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+
+        .step-instruction {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .step-note {
+            background-color: rgba(77, 196, 196, 0.1);
+            border-left: 3px solid var(--neon);
+            padding: 8px;
+            margin: 10px 0;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .image-wrapper {
+            aspect-ratio: 1;
+            margin: 0 auto;
+            border: 6px solid var(--neon);
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(77, 196, 196, 0.4);
+            max-width: 100%;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #shopping-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: transparent;
+            min-height: 100px;
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button.nav-btn {
+            padding: 12px 30px;
+            background-color: transparent;
+            color: var(--neon);
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1em;
+            font-family: 'Architects Daughter', cursive;
+            transition: transform 0.1s;
+        }
+
+        button.nav-btn:active {
+            transform: scale(0.98);
+        }
+
+        #next-step-btn {
+            background-color: var(--neon);
+            color: #000;
+        }
+
+        #prev-step-btn {
+            border: 1px solid rgba(77, 196, 196, 0.12);
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(77, 196, 196, 0.12);
+            background-color: #222;
+            color: #fff;
+            font-family: 'Architects Daughter', cursive;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="player-ui" class="active-player-wrapper" style="display:none;">
+        <div id="component-selectors-container">
+            <p style="color: var(--neon); margin:0 0 8px 0;">Loading recipes...</p>
+        </div>
+        
+        <h2 id="component-name-display"></h2>
+
+        <div class="main-row">
+            <div class="left-col">
+                <div class="step-header">
+                    <div id="step-indicator" class="step-indicator">Step 1</div>
+                </div>
+                <div class="step-content">
+                    <p id="step-instruction" class="step-instruction"></p>
+                    <div id="step-note" class="step-note"></div>
+                </div>
+            </div>
+
+            <div class="center-col">
+                <div class="image-wrapper" style="display:none;">
+                    <img id="step-image-display" src="" alt="Step Image">
+                </div>
+            </div>
+
+            <div class="right-col">
+                <div id="shopping-area">Shopping / Cart placeholder</div>
+            </div>
+        </div>
+        
+        <div class="nav-buttons">
+            <button id="prev-step-btn" class="nav-btn" disabled>Previous</button>
+            <button id="next-step-btn" class="nav-btn">Next Step</button>
+        </div>
+    </div>
+
+    <script>
+        const API_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzpa2twHFgXeBeLWD0_cb8QdH7MdAJoxJxC4f86Ib2Ww3g4bfirAi33HuNXQ9MWcPNeaA/exec';
+        
+        let currentRecipeData = null;
+        let currentStepIndex = 0;
+        let currentInstructions = [];
+
+        async function fetchRecipeList() {
+            const container = document.getElementById('component-selectors-container');
+            container.innerHTML = '<p style="color: var(--neon); margin:0 0 8px 0;">Loading recipes...</p>';
+            try {
+                const resp = await fetch(`${API_ENDPOINT}?action=list`);
+                const json = await resp.json();
+                let recipes = [];
+                if (json && json.data && Array.isArray(json.data)) {
+                    recipes = json.data.map(r => r.Recipe_Title || r.Recipe || r.title || r.name).filter(Boolean);
+                }
+
+                container.innerHTML = '';
+                const label = document.createElement('h3');
+                label.textContent = 'Choose Recipe:';
+                container.appendChild(label);
+
+                const select = document.createElement('select');
+                select.id = 'recipe-select';
+                const emptyOpt = document.createElement('option');
+                emptyOpt.value = '';
+                emptyOpt.textContent = '-- Select a recipe --';
+                select.appendChild(emptyOpt);
+
+                recipes.forEach(name => {
+                    const o = document.createElement('option');
+                    o.value = name;
+                    o.textContent = name;
+                    select.appendChild(o);
+                });
+
+                container.appendChild(select);
+
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'component-btn';
+                loadBtn.textContent = 'Load Recipe';
+                loadBtn.style.marginLeft = '8px';
+                loadBtn.onclick = () => {
+                    const val = document.getElementById('recipe-select').value;
+                    if (val) fetchAndLoadRecipe(val);
+                };
+                container.appendChild(loadBtn);
+
+            } catch (err) {
+                console.error('Failed to fetch recipe list', err);
+                container.innerHTML = '<p style="color:#ff6b6b;">Could not load recipe list.</p>';
+            }
+        }
+
+        async function fetchAndLoadRecipe(recipeName) {
+            try {
+                const response = await fetch(`${API_ENDPOINT}?recipe=${encodeURIComponent(recipeName)}`);
+                const json = await response.json();
+                if (json.data && json.data.length > 0) {
+                    currentRecipeData = json.data[0];
+                    try {
+                        currentRecipeData.parsedInstructions = JSON.parse(currentRecipeData.Instructions_JSON);
+                    } catch (e) {
+                        currentRecipeData.parsedInstructions = [];
+                    }
+                    setupComponentSelectors(currentRecipeData.Component_Names);
+                    if (currentRecipeData.Component_Names.length > 0) {
+                        loadComponent(currentRecipeData.Component_Names[0]);
+                    }
+                    document.getElementById('player-ui').style.display = 'flex';
+                } else {
+                    document.getElementById('component-selectors-container').innerHTML = '<p>Recipe not found.</p>';
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('component-selectors-container').innerHTML = '<p>Error loading recipe.</p>';
+            }
+        }
+
+        function setupComponentSelectors(names) {
+            const container = document.getElementById('component-selectors-container');
+            container.innerHTML = '<h3 style="color: var(--neon);">Select Component:</h3>';
+            
+            names.forEach(name => {
+                if(!name) return;
+                const btn = document.createElement('button');
+                btn.className = 'component-btn';
+                btn.textContent = name;
+                btn.onclick = () => loadComponent(name);
+                container.appendChild(btn);
+            });
+        }
+
+        function loadComponent(componentName) {
+            currentStepIndex = 0;
+            
+            let activeInstructions = [];
+            if (Array.isArray(currentRecipeData.parsedInstructions)) {
+                activeInstructions = currentRecipeData.parsedInstructions.filter(s => {
+                    const comp = s.component || s.Component || '';
+                    return comp ? String(comp).trim() === String(componentName).trim() : false;
+                });
+
+                if (activeInstructions.length === 0) {
+                    activeInstructions = currentRecipeData.parsedInstructions.slice();
+                }
+            }
+
+            document.querySelectorAll('.component-btn').forEach(b => {
+                b.classList.toggle('active', b.textContent === componentName);
+            });
+            
+            document.getElementById('player-ui').style.display = 'flex';
+            document.getElementById('component-name-display').textContent = componentName;
+            
+            currentInstructions = activeInstructions;
+            updateDisplay(activeInstructions);
+        }
+
+        function updateDisplay(instructions) {
+            if (!instructions || instructions.length === 0) {
+                document.getElementById('step-indicator').textContent = '';
+                document.getElementById('step-instruction').textContent = '';
+                document.getElementById('step-note').textContent = '';
+                document.getElementById('prev-step-btn').disabled = true;
+                document.getElementById('next-step-btn').disabled = true;
+                return;
+            }
+
+            if (currentStepIndex < 0) currentStepIndex = 0;
+            if (currentStepIndex > instructions.length - 1) currentStepIndex = instructions.length - 1;
+
+            const stepData = instructions[currentStepIndex] || {};
+
+            document.getElementById('step-indicator').textContent = `Step ${currentStepIndex + 1} of ${instructions.length}`;
+            document.getElementById('step-instruction').textContent = stepData.instruction || '';
+            document.getElementById('step-note').textContent = stepData.note || '';
+
+            const img = document.getElementById('step-image-display');
+            const imgWrapper = document.querySelector('.image-wrapper');
+            if (stepData.image && String(stepData.image).trim()) {
+                img.src = stepData.image;
+                imgWrapper.style.display = 'flex';
+            } else {
+                imgWrapper.style.display = 'none';
+            }
+
+            const prevBtn = document.getElementById('prev-step-btn');
+            const nextBtn = document.getElementById('next-step-btn');
+
+            prevBtn.disabled = currentStepIndex === 0;
+            prevBtn.textContent = currentStepIndex === 0 ? 'Previous' : 'Previous';
+
+            if (currentStepIndex === instructions.length - 1) {
+                nextBtn.textContent = 'Finished';
+                nextBtn.disabled = true;
+            } else {
+                nextBtn.textContent = 'Next Step';
+                nextBtn.disabled = false;
+            }
+
+            prevBtn.onclick = () => {
+                if (currentStepIndex > 0) {
+                    currentStepIndex--;
+                    updateDisplay(instructions);
+                }
+            };
+
+            nextBtn.onclick = () => {
+                if (currentStepIndex < instructions.length - 1) {
+                    currentStepIndex++;
+                    updateDisplay(instructions);
+                }
+            };
+        }
+
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const recipeName = params.get('recipe');
+
+            if (!recipeName) {
+                await fetchRecipeList();
+                return;
+            }
+
+            await fetchAndLoadRecipe(recipeName);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
